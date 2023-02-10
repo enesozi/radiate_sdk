@@ -394,8 +394,7 @@ class Sequence:
                     exist_ok=True,
                 )
             if self.config["use_camera_left_raw"]:
-                cv2.imshow('camera left raw',
-                output['sensors']['camera_left_raw'])
+                cv2.imshow("camera left raw", output["sensors"]["camera_left_raw"])
                 if self.config["save_images"]:
                     cv2.imwrite(
                         os.path.join(
@@ -407,8 +406,7 @@ class Sequence:
                     )
 
             if self.config["use_camera_right_raw"]:
-                cv2.imshow('camera right raw',
-                output['sensors']['camera_right_raw'])
+                cv2.imshow("camera right raw", output["sensors"]["camera_right_raw"])
                 if self.config["save_images"]:
                     cv2.imwrite(
                         os.path.join(
@@ -424,7 +422,7 @@ class Sequence:
                     output["sensors"]["camera_left_rect"],
                     output["annotations"]["camera_left_rect"],
                 )
-                cv2.imshow('camera left', left_bb)
+                cv2.imshow("camera left", left_bb)
                 if self.config["save_images"]:
                     cv2.imwrite(
                         os.path.join(
@@ -438,7 +436,7 @@ class Sequence:
                     output["sensors"]["camera_right_rect"],
                     output["annotations"]["camera_right_rect"],
                 )
-                cv2.imshow('camera right', right_bb)
+                cv2.imshow("camera right", right_bb)
                 if self.config["save_images"]:
                     cv2.imwrite(
                         os.path.join(
@@ -452,7 +450,7 @@ class Sequence:
                     output["sensors"]["radar_cartesian"],
                     output["annotations"]["radar_cartesian"],
                 )
-                cv2.imshow('radar', radar_cart_vis)
+                cv2.imshow("radar", radar_cart_vis)
                 if self.config["save_images"]:
                     cv2.imwrite(
                         os.path.join(
@@ -464,7 +462,7 @@ class Sequence:
                     )
 
             if self.config["use_radar_polar"]:
-                cv2.imshow('radar', output['sensors']['radar_polar'])
+                cv2.imshow("radar", output["sensors"]["radar_polar"])
                 if self.config["save_images"]:
                     cv2.imwrite(
                         os.path.join(
@@ -480,7 +478,7 @@ class Sequence:
                     output["sensors"]["lidar_bev_image"],
                     output["annotations"]["lidar_bev_image"],
                 )
-                cv2.imshow('lidar image', lidar_vis)
+                cv2.imshow("lidar image", lidar_vis)
                 if self.config["save_images"]:
                     cv2.imwrite(
                         os.path.join(
@@ -497,7 +495,7 @@ class Sequence:
                 overlay_left_bb = self.vis_3d_bbox_cam(
                     overlay_left, output["annotations"]["camera_left_rect"]
                 )
-                cv2.imshow('projected lidar to left camera', overlay_left_bb)
+                cv2.imshow("projected lidar to left camera", overlay_left_bb)
                 if self.config["save_images"]:
                     cv2.imwrite(
                         os.path.join(
@@ -515,7 +513,7 @@ class Sequence:
                 overlay_right_bb = self.vis_3d_bbox_cam(
                     overlay_right, output["annotations"]["camera_right_rect"]
                 )
-                cv2.imshow('projected lidar to right camera', overlay_right_bb)
+                cv2.imshow("projected lidar to right camera", overlay_right_bb)
                 if self.config["save_images"]:
                     cv2.imwrite(
                         os.path.join(
@@ -550,10 +548,11 @@ class Sequence:
             height = self.heights[class_name]
             bb = object["bbox"]["position"]
             rotation = object["bbox"]["rotation"]
-            bbox_3d = self.__get_projected_bbox(
+            bbox_3d, dist_bboxes = self.__get_projected_bbox(
                 bb, rotation, intrinsict, extrinsic, height
             )
             obj["bbox_3d"] = bbox_3d
+            obj["distance"] = dist_bboxes
             bboxes_3d.append(obj)
 
         return bboxes_3d
@@ -1023,12 +1022,14 @@ class Sequence:
 
         xIm = np.round((fx * points[:, 0] / points[:, 2]) + cx).astype(int)
         yIm = np.round((fy * points[:, 1] / points[:, 2]) + cy).astype(int)
-
+        dist = np.sqrt(points[:, 0] ** 2 + points[:, 1] ** 2 + points[:, 2] ** 2)
         proj_bbox_3d = []
+        dist_bbox = []
         for ii in range(1, xIm.shape[0]):
             proj_bbox_3d.append([xIm[ii], yIm[ii]])
+            dist_bbox.append([dist[ii]])
         proj_bbox_3d = np.array(proj_bbox_3d)
-        return proj_bbox_3d
+        return proj_bbox_3d , np.array(dist_bbox)
 
     def draw_boundingbox_rot(self, im, bbox, angle, color):
         points = self.gen_boundingbox_rot(bbox, angle)

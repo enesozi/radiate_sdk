@@ -31,7 +31,7 @@ lidar_proj:
     max_dist: 80
     remove_ground: False
     ground_thresh: 1.5
-    color_mode: 'same'   # 'same', 'pseudo_distance', 'distance'
+    color_mode: 'distance'   # 'same', 'pseudo_distance', 'distance'
 
 
 # width and height resolution of a bird's eye view lidar image
