@@ -548,6 +548,7 @@ class Sequence:
             height = self.heights[class_name]
             bb = object["bbox"]["position"]
             rotation = object["bbox"]["rotation"]
+            obj["rotation"] = rotation
             bbox_3d, dist_bboxes = self.__get_projected_bbox(
                 bb, rotation, intrinsict, extrinsic, height
             )
@@ -1025,11 +1026,13 @@ class Sequence:
         dist = np.sqrt(points[:, 0] ** 2 + points[:, 1] ** 2 + points[:, 2] ** 2)
         proj_bbox_3d = []
         dist_bbox = []
-        for ii in range(1, xIm.shape[0]):
+        for ii in range(0, xIm.shape[0]):
+            if xIm[ii] < 0 or yIm[ii] < 0:
+                continue
             proj_bbox_3d.append([xIm[ii], yIm[ii]])
             dist_bbox.append([dist[ii]])
         proj_bbox_3d = np.array(proj_bbox_3d)
-        return proj_bbox_3d , np.array(dist_bbox)
+        return proj_bbox_3d, np.array(dist_bbox)
 
     def draw_boundingbox_rot(self, im, bbox, angle, color):
         points = self.gen_boundingbox_rot(bbox, angle)
